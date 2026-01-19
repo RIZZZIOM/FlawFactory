@@ -17,7 +17,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-[Getting Started](#getting-started) • [Features](#features) • [Documentation](../../wiki) • [Contributing](CONTRIBUTING.md)
+[Getting Started](#getting-started) • [Features](#features) • [Documentation](https://github.com/RIZZZIOM/FlawFactory/wiki) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
