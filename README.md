@@ -263,7 +263,7 @@ For the complete usage guide, configuration reference, and detailed module docum
 
 Contributions are welcome! Whether it's new vulnerability modules, bug fixes, or documentation improvements - I'd appreciate the help.
 
-Please read the [Contributing Guidelines]() before submitting a PR.
+Please read the [Contributing Guidelines](CONTRIBUTING.md) before submitting a PR.
 
 ## License
 
