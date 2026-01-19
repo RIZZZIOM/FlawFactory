@@ -257,7 +257,7 @@ Check out the `/templates` directory for ready-to-use configs for each vulnerabi
 
 ## User Guide
 
-For the complete usage guide, configuration reference, and detailed module documentation, check out the [Wiki]().
+For the complete usage guide, configuration reference, and detailed module documentation, check out the [Wiki](https://github.com/RIZZZIOM/FlawFactory/wiki).
 
 ## Contributing
 
