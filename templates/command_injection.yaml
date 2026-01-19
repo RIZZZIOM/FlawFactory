@@ -1,0 +1,370 @@
+app:
+  name: "Command Injection Example Lab"
+  descrption: "A vulnerable application demonstrating Command Injection flaws."
+  host: "0.0.0.0"
+  port: 8084
+
+endpoints:
+  # ===== QUERY PARAMETER =====
+  # 1. query param with none filter → curl "http://localhost:8084/query/none?host=127.0.0.1%26whoami"
+  - path: /query/none
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: none
+
+  # 2. query param with basic_semicolon filter → curl "http://localhost:8084/query/semicolon?host=127.0.0.1%7Cwhoami"
+  - path: /query/semicolon
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_semicolon
+
+  # 3. query param with basic_pipe filter → curl "http://localhost:8084/query/pipe?host=127.0.0.1%26whoami"
+  - path: /query/pipe
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_pipe
+
+  # 4. query param with basic_both filter → curl "http://localhost:8084/query/both?host=127.0.0.1%26%26whoami"
+  - path: /query/both
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_both
+
+  # 5. query param with url_decode filter → curl "http://localhost:8084/query/urldecode?host=127.0.0.1%2526whoami"
+  - path: /query/urldecode
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: url_decode
+
+  # ===== PATH PARAMETER =====
+  # 6. path param with none filter → curl "http://localhost:8084/path/none/127.0.0.1%26whoami"
+  - path: /path/none/{host}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: path_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: none
+
+  # 7. path param with basic_semicolon filter → curl "http://localhost:8084/path/semicolon/127.0.0.1%7Cwhoami"
+  - path: /path/semicolon/{host}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: path_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_semicolon
+
+  # 8. path param with basic_pipe filter → curl "http://localhost:8084/path/pipe/127.0.0.1%26whoami"
+  - path: /path/pipe/{host}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: path_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_pipe
+
+  # 9. path param with basic_both filter → curl "http://localhost:8084/path/both/127.0.0.1%26%26whoami"
+  - path: /path/both/{host}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: path_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_both
+
+  # 10. path param with url_decode filter → curl "http://localhost:8084/path/urldecode/127.0.0.1%2526whoami"
+  - path: /path/urldecode/{host}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: path_param
+        param: host
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: url_decode
+
+  # ===== FORM FIELD =====
+  # 11. form field with none filter → curl "http://localhost:8084/form/none" -X POST -d "cmd=whoami"
+  - path: /form/none
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: cmd
+        config:
+          filter: none
+
+  # 12. form field with basic_semicolon filter → curl "http://localhost:8084/form/semicolon" -X POST -d "domain=google.com|whoami"
+  - path: /form/semicolon
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: domain
+        config:
+          base_command: "nslookup {input}"
+          filter: basic_semicolon
+
+  # 13. form field with basic_pipe filter → curl "http://localhost:8084/form/pipe" -X POST -d "domain=google.com%26%26whoami"
+  - path: /form/pipe
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: domain
+        config:
+          base_command: "nslookup {input}"
+          filter: basic_pipe
+
+  # 14. form field with basic_both filter → curl "http://localhost:8084/form/both" -X POST -d "domain=google.com%26%26whoami"
+  - path: /form/both
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: domain
+        config:
+          base_command: "nslookup {input}"
+          filter: basic_both
+
+  # 15. form field with url_decode filter → curl "http://localhost:8084/form/urldecode" -X POST -d "domain=google.com%26%26whoami"
+  - path: /form/urldecode
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: domain
+        config:
+          base_command: "nslookup {input}"
+          filter: url_decode
+
+  # ===== JSON FIELD =====
+  # 16. JSON field with none filter → curl "http://localhost:8084/json/none" -X POST -H "Content-Type: application/json" -d '{"ip":"127.0.0.1&whoami"}'
+  - path: /json/none
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: ip
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: none
+
+  # 17. JSON field with basic_semicolon filter → curl "http://localhost:8084/json/semicolon" -X POST -H "Content-Type: application/json" -d '{"ip":"127.0.0.1|whoami"}'
+  - path: /json/semicolon
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: ip
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_semicolon
+
+  # 18. JSON field with basic_pipe filter → curl "http://localhost:8084/json/pipe" -X POST -H "Content-Type: application/json" -d '{"ip":"127.0.0.1&whoami"}'
+  - path: /json/pipe
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: ip
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_pipe
+
+  # 19. JSON field with basic_both filter → curl "http://localhost:8084/json/both" -X POST -H "Content-Type: application/json" -d '{"ip":"127.0.0.1&&whoami"}'
+  - path: /json/both
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: ip
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_both
+
+  # 20. JSON field with url_decode filter → curl "http://localhost:8084/json/urldecode" -X POST -H "Content-Type: application/json" -d '{"ip":"127.0.0.1%26whoami"}'
+  - path: /json/urldecode
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: ip
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: url_decode
+
+  # ===== HEADER =====
+  # 21. header with none filter → curl "http://localhost:8084/header/none" -H "X-Forwarded-For: 127.0.0.1&whoami"
+  - path: /header/none
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: X-Forwarded-For
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: none
+
+  # 22. header with basic_semicolon filter → curl "http://localhost:8084/header/semicolon" -H "X-Forwarded-For: 127.0.0.1|whoami"
+  - path: /header/semicolon
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: X-Forwarded-For
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_semicolon
+
+  # 23. header with basic_pipe filter → curl "http://localhost:8084/header/pipe" -H "X-Forwarded-For: 127.0.0.1&whoami"
+  - path: /header/pipe
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: X-Forwarded-For
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_pipe
+
+  # 24. header with basic_both filter → curl "http://localhost:8084/header/both" -H "X-Forwarded-For: 127.0.0.1&&whoami"
+  - path: /header/both
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: X-Forwarded-For
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: basic_both
+
+  # 25. header with url_decode filter → curl "http://localhost:8084/header/urldecode" -H "X-Forwarded-For: 127.0.0.1%26whoami"
+  - path: /header/urldecode
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: X-Forwarded-For
+        config:
+          base_command: "ping -n 1 {input}"
+          filter: url_decode
+
+  # ===== DIFFERENT BASE COMMANDS =====
+  # 26. direct command execution (no base_command) → curl "http://localhost:8084/direct?cmd=whoami"
+  - path: /direct
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: cmd
+        config:
+          filter: none
+
+  # 27. echo command → curl "http://localhost:8084/echo?name=test%26whoami"
+  - path: /echo
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: query_param
+        param: name
+        config:
+          base_command: "echo Hello, {input}!"
+          filter: none
+
+  # 28. search via form → curl "http://localhost:8084/search" -X POST -d "pattern=error&whoami"
+  - path: /search
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: form_field
+        param: pattern
+        config:
+          base_command: "echo 'Searching for: {input}'"
+          filter: none
+
+  # 29. User-Agent header injection → curl "http://localhost:8084/log" -H "User-Agent: Mozilla&whoami"
+  - path: /log
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: header
+        param: User-Agent
+        config:
+          base_command: "echo 'User-Agent: {input}'"
+          filter: none
+
+  # 30. nslookup via JSON → curl "http://localhost:8084/dns" -X POST -H "Content-Type: application/json" -d '{"domain":"google.com&whoami"}'
+  - path: /dns
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: command_injection
+        placement: json_field
+        param: domain
+        config:
+          base_command: "nslookup {input}"
+          filter: none

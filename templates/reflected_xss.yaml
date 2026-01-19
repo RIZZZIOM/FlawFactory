@@ -1,0 +1,282 @@
+app:
+  name: "Reflected XSS Example Lab"
+  descrption: "A vulnerable application demonstrating Reflected Cross Site Scripting flaws."
+  host: "0.0.0.0"
+  port: 8082
+
+endpoints:
+  # ===== BODY CONTEXT =====
+  # Input is placed directly in HTML body - exploitable with direct HTML/script injection
+
+  # 1. body context via query param → curl "http://localhost:8082/body/query?search=<script>alert(1)</script>"
+  - path: /body/query
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: search
+        config:
+          context: body
+
+  # 2. body context via path param → curl "http://localhost:8082/body/path/%3Cscript%3Ealert(1)%3C%2Fscript%3E"
+  - path: /body/path/{name}
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: path_param
+        param: name
+        config:
+          context: body
+
+  # 3. body context via form field → curl "http://localhost:8082/body/form" -X POST -d "query=<script>alert(1)</script>"
+  - path: /body/form
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: form_field
+        param: query
+        config:
+          context: body
+
+  # 4. body context via JSON field → curl "http://localhost:8082/body/json" -X POST -H "Content-Type: application/json" -d '{"search":"<script>alert(1)</script>"}'
+  - path: /body/json
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: json_field
+        param: search
+        config:
+          context: body
+
+  # 5. body context via header → curl "http://localhost:8082/body/header" -H "X-Search: <script>alert(1)</script>"
+  - path: /body/header
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: header
+        param: X-Search
+        config:
+          context: body
+
+  # ===== ATTRIBUTE CONTEXT =====
+  # Input is placed inside HTML attribute values - exploitable with attribute escape and event handlers
+
+  # 6. attribute context via query param → curl "http://localhost:8082/attribute/query?value=%22%3E%3Cscript%3Ealert()%3C/script%3E"
+  - path: /attribute/query
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: value
+        config:
+          context: attribute
+
+  # 7. attribute context via path param → curl "http://localhost:8082/attribute/path/%22onfocus=%22alert(1)"
+  - path: /attribute/path/{term}
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: path_param
+        param: term
+        config:
+          context: attribute
+
+  # 8. attribute context via form field → curl "http://localhost:8082/attribute/form" -X POST -d "input=\"onmouseover=\"alert(1)"
+  - path: /attribute/form
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: form_field
+        param: input
+        config:
+          context: attribute
+
+  # 9. attribute context via JSON field → curl "http://localhost:8082/attribute/json" -X POST -H "Content-Type: application/json" -d '{"term":"\"onfocus=\"alert(1)"}'
+  - path: /attribute/json
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: json_field
+        param: term
+        config:
+          context: attribute
+
+  # 10. attribute context via header → curl "http://localhost:8082/attribute/header" -H "Referer: \"onmouseover=\"alert(1)"
+  - path: /attribute/header
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: header
+        param: Referer
+        config:
+          context: attribute
+
+  # ===== SCRIPT CONTEXT =====
+  # Input is placed inside JavaScript code - exploitable with JS string escape and code injection
+
+  # 11. script context via query param → curl "http://localhost:8082/script/query?data=%27%3Balert(1)%3B%2F%2F"
+  - path: /script/query
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: data
+        config:
+          context: script
+
+  # 12. script context via path param → curl "http://localhost:8082/script/path/%27;alert(1);%2F%2F"
+  - path: /script/path/{input}
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: path_param
+        param: input
+        config:
+          context: script
+
+  # 13. script context via form field → curl "http://localhost:8082/script/form" -X POST -d "value=%27%3Balert(1)%3B%2F%2F"
+  - path: /script/form
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: form_field
+        param: value
+        config:
+          context: script
+
+  # 14. script context via JSON field → curl "http://localhost:8082/script/json" -X POST -H "Content-Type: application/json" -d '{"code":"\";alert(1);//"}'
+  - path: /script/json
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: json_field
+        param: code
+        config:
+          context: script
+
+  # 15. script context via header → curl 'http://localhost:8082/script/header' -H "X-Callback: ';alert(1);//"
+  - path: /script/header
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: header
+        param: X-Callback
+        config:
+          context: script
+
+  # ===== ENCODING VARIATIONS =====
+  # 16. incomplete_html encoding (only encodes < and >) → curl "http://localhost:8082/encoding/incomplete-html?input="onmouseover="alert(1)"
+  - path: /encoding/incomplete-html
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: input
+        config:
+          context: attribute
+          encoding: incomplete_html
+
+  # 17. incomplete_js encoding (only escapes single quotes) → curl "http://localhost:8082/encoding/incomplete-js?input=%22-alert(1)-%22"
+  - path: /encoding/incomplete-js
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: input
+        config:
+          context: script
+          encoding: incomplete_js
+
+  # 18. weak_encode encoding (case-sensitive blocklist - only blocks lowercase <script>)
+  # Bypass 1: curl "http://localhost:8082/encoding/weak?input=<ScRiPt>alert(1)</ScRiPt>"
+  # Bypass 2: curl "http://localhost:8082/encoding/weak?input=<img src=x onerror=alert(1)>"
+  - path: /encoding/weak
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: input
+        config:
+          context: body
+          encoding: weak_encode
+
+  # 19. no encoding (fully vulnerable) via form → curl "http://localhost:8082/encoding/none" -X POST -d "payload=<script>alert(1)</script>"
+  - path: /encoding/none
+    method: POST
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: form_field
+        param: payload
+        config:
+          context: body
+          encoding: none
+
+  # ===== CUSTOM TEMPLATE EXAMPLES =====
+  # Demonstrating custom HTML templates with {input} placeholder
+
+  # 20. custom template - user profile → curl "http://localhost:8082/custom/profile?username=<script>alert(1)</script>"
+  - path: /custom/profile
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: username
+        config:
+          context: body
+          template: "<div class='profile-card'><h3>Welcome, {input}!</h3><p>Your profile has been loaded.</p></div>"
+
+  # 21. custom template - error message → curl "http://localhost:8082/custom/error?msg=%3Cimg%20src=x%20onerror=alert(1)%3E>"
+  - path: /custom/error
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: msg
+        config:
+          context: body
+          template: "<div class='error-box'><strong>Error:</strong> {input}</div>"
+
+  # 22. custom template - attribute injection → curl "http://localhost:8082/custom/link?url=javascript:alert(1)"
+  - path: /custom/link
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: url
+        config:
+          context: attribute
+          template: "<a href='{input}' class='external-link'>Click here</a><iframe src='{input}'></iframe>"
+
+  # 23. custom template - script variable → curl "http://localhost:8082/custom/config?setting=%27%3Balert(document.domain)%3B%2F%2F"
+  - path: /custom/config
+    method: GET
+    response_type: html
+    vulnerabilities:
+      - type: xss_reflected
+        placement: query_param
+        param: setting
+        config:
+          context: script
+          template: "<script>var userSetting = '{input}'; initApp(userSetting);</script>"

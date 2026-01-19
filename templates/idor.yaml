@@ -1,0 +1,413 @@
+app:
+  name: "IDOR Example Lab"
+  descrption: "A vulnerable application demonstrating IDOR flaws."
+  host: "0.0.0.0"
+  port: 8085
+
+data:
+  tables:
+    users:
+      columns: [id, username, password, is_admin]
+      rows:
+        - [1, "admin", "adminpass", "false"]
+        - [2, "rick", "c137", "true"]
+        - [3, "morty", "sidekick", "false"]
+        - [4, "beth", "jerry", "false"]
+    cars:
+      columns: [sr, company, model, colour, country_code]
+      rows:
+        - [1, "suzuki", "jimny", "blue", "JP"]
+        - [2, "lamborghini", "aventador", "orange", "IT"]
+        - [3, "bmw", "m4", "white", "GER"]
+        - [4, "jeep", "wrangler", "green", "US"]
+        - [5, "aston martin", "db12", "black", "UK"]
+    bikes:
+      columns: [no, company, model, colour, country_code]
+      rows:
+        - [1, "bmw", "s1000rr", "white", "GER"]
+        - [2, "mv agusta", "brutale", "red", "IT"]
+        - [3, "honda", "cbr600rr", "blue", "JP"]
+    # UUID-based table for uuid variant testing
+    profiles:
+      columns: [uuid, username, email, role]
+      rows:
+        - ["a1b2c3d4-e5f6-7890-abcd-ef1234567890", "admin", "admin@example.com", "admin"]
+        - ["b2c3d4e5-f6a7-8901-bcde-f12345678901", "rick", "rick@example.com", "user"]
+        - ["c3d4e5f6-a7b8-9012-cdef-123456789012", "morty", "morty@example.com", "user"]
+        - ["d4e5f6a7-b8c9-0123-defa-234567890123", "beth", "beth@example.com", "user"]
+    # Encoded ID table (base64 of 1,2,3,4 = MQ==, Mg==, Mw==, NA==)
+    documents:
+      columns: [doc_id, title, content, owner]
+      rows:
+        - ["MQ==", "Secret Doc 1", "Confidential content A", "admin"]
+        - ["Mg==", "Secret Doc 2", "Confidential content B", "rick"]
+        - ["Mw==", "Secret Doc 3", "Confidential content C", "morty"]
+        - ["NA==", "Secret Doc 4", "Confidential content D", "beth"]
+    # Predictable ID table
+    orders:
+      columns: [order_id, item, quantity, customer]
+      rows:
+        - ["user_001", "Portal Gun", 1, "admin"]
+        - ["user_002", "Plumbus", 5, "rick"]
+        - ["user_003", "Meeseeks Box", 2, "morty"]
+        - ["user_004", "Butter Robot", 1, "beth"]
+
+endpoints:
+  # ===== 1. NUMERIC VARIANT =====
+  # 1.1 query parameter → curl "http://localhost:8085/numeric/query?id=1"
+  - path: /numeric/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 1.2 path parameter → curl "http://localhost:8085/numeric/path/1"
+  - path: /numeric/path/{id}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: path_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 1.3 form field → curl "http://localhost:8085/numeric/form" -X POST -d "id=1"
+  - path: /numeric/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: form_field
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 1.4 json field → curl "http://localhost:8085/numeric/json" -X POST -H "Content-Type: application/json" -d '{"id":1}'
+  - path: /numeric/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: json_field
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 1.5 header → curl "http://localhost:8085/numeric/header" -H "X-User-ID: 1"
+  - path: /numeric/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: header
+        param: X-User-ID
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 1.6 cookie → curl "http://localhost:8085/numeric/cookie" -b "user_id=1"
+  - path: /numeric/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: cookie
+        param: user_id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # ===== 2. UUID VARIANT =====
+  # 2.1 query parameter → curl "http://localhost:8085/uuid/query?id=a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  - path: /uuid/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # 2.2 path parameter → curl "http://localhost:8085/uuid/path/a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  - path: /uuid/path/{id}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: path_param
+        param: id
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # 2.3 form field → curl "http://localhost:8085/uuid/form" -X POST -d "id=a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  - path: /uuid/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: form_field
+        param: id
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # 2.4 json field → curl "http://localhost:8085/uuid/json" -X POST -H "Content-Type: application/json" -d '{"id":"a1b2c3d4-e5f6-7890-abcd-ef1234567890"}'
+  - path: /uuid/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: json_field
+        param: id
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # 2.5 header → curl "http://localhost:8085/uuid/header" -H "X-User-ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  - path: /uuid/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: header
+        param: X-User-ID
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # 2.6 cookie → curl "http://localhost:8085/uuid/cookie" -b "user_id=a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  - path: /uuid/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: cookie
+        param: user_id
+        config:
+          variant: uuid
+          query_template: "SELECT * FROM profiles WHERE uuid = '{input}'"
+
+  # ===== 3. ENCODED VARIANT =====
+  # 3.1 query parameter → curl "http://localhost:8085/encoded/query?id=MQ=="
+  - path: /encoded/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # 3.2 path parameter → curl "http://localhost:8085/encoded/path/MQ=="
+  - path: /encoded/path/{id}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: path_param
+        param: id
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # 3.3 form field → curl "http://localhost:8085/encoded/form" -X POST -d "id=MQ=="
+  - path: /encoded/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: form_field
+        param: id
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # 3.4 json field → curl "http://localhost:8085/encoded/json" -X POST -H "Content-Type: application/json" -d '{"id":"MQ=="}'
+  - path: /encoded/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: json_field
+        param: id
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # 3.5 header → curl "http://localhost:8085/encoded/header" -H "X-User-ID: MQ=="
+  - path: /encoded/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: header
+        param: X-User-ID
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # 3.6 cookie → curl "http://localhost:8085/encoded/cookie" -b "user_id=MQ=="
+  - path: /encoded/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: cookie
+        param: user_id
+        config:
+          variant: encoded
+          query_template: "SELECT * FROM documents WHERE doc_id = '{input}'"
+
+  # ===== 4. PREDICTABLE VARIANT =====
+  # 4.1 query parameter → curl "http://localhost:8085/predictable/query?id=user_001"
+  - path: /predictable/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # 4.2 path parameter → curl "http://localhost:8085/predictable/path/user_001"
+  - path: /predictable/path/{id}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: path_param
+        param: id
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # 4.3 form field → curl "http://localhost:8085/predictable/form" -X POST -d "id=user_001"
+  - path: /predictable/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: form_field
+        param: id
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # 4.4 json field → curl "http://localhost:8085/predictable/json" -X POST -H "Content-Type: application/json" -d '{"id":"user_001"}'
+  - path: /predictable/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: json_field
+        param: id
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # 4.5 header → curl "http://localhost:8085/predictable/header" -H "X-User-ID: user_001"
+  - path: /predictable/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: header
+        param: X-User-ID
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # 4.6 cookie → curl "http://localhost:8085/predictable/cookie" -b "user_id=user_001"
+  - path: /predictable/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: cookie
+        param: user_id
+        config:
+          variant: predictable
+          query_template: "SELECT * FROM orders WHERE order_id = '{input}'"
+
+  # ===== 5. ACCESS CONTROLS =====
+  # 5.1 none (baseline) → curl "http://localhost:8085/access/none?id=1"
+  - path: /access/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+          access_control: none
+
+  # 5.2 weak_header → curl "http://localhost:8085/access/weak-header?id=1" -H "X-User-ID: 1"
+  - path: /access/weak-header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+          access_control: weak_header
+
+  # 5.3 weak_cookie → curl "http://localhost:8085/access/weak-cookie?id=1" -b "user_id=1"
+  - path: /access/weak-cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+          access_control: weak_cookie
+
+  # 5.4 role_based → curl "http://localhost:8085/access/role-based?id=1" -H "X-User-Role: admin"
+  - path: /access/role-based
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+          access_control: role_based
+
+  # 5.5 predictable_token → curl "http://localhost:8085/access/predictable-token?id=1" -H "Authorization: Bearer user_1"
+  - path: /access/predictable-token
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: idor
+        placement: query_param
+        param: id
+        config:
+          variant: numeric
+          query_template: "SELECT * FROM users WHERE id = {input}"
+          access_control: predictable_token
+

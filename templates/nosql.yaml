@@ -1,0 +1,189 @@
+app:
+  name: "NoSQL Injection Example Lab"
+  descrption: "A vulnerable application demonstrating NoSQL Injection flaws."
+  host: "0.0.0.0"
+  port: 8089
+
+endpoints:
+  # =============================================================================
+  # MONGODB ENDPOINTS
+  # =============================================================================
+
+  # ===== QUERY PARAMETER - MONGODB =====
+  # 1. query param mongodb find → curl 'http://localhost:8089/mongo/query?filter={"$ne":""}'
+  - path: /mongo/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: query_param
+        param: filter
+        config:
+          database: mongodb
+          collection: users
+          operation: find
+          show_errors: true
+
+  # ===== PATH PARAMETER - MONGODB =====
+  # 2. path param mongodb findOne → curl 'http://localhost:8089/mongo/path/{"$ne":""}'
+  - path: /mongo/path/{username}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: path_param
+        param: username
+        config:
+          database: mongodb
+          collection: users
+          operation: findOne
+          query_template: '{"username": {input}}'
+          show_errors: true
+
+  # ===== FORM FIELD - MONGODB =====
+  # 3. form field mongodb find → curl 'http://localhost:8089/mongo/form' -X POST --data-urlencode 'query={"$ne":""}'
+  - path: /mongo/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: form_field
+        param: query
+        config:
+          database: mongodb
+          collection: users
+          operation: find
+          show_errors: true
+
+  # ===== JSON FIELD - MONGODB =====
+  # 4. json field mongodb find → curl 'http://localhost:8089/mongo/json' -X POST -H 'Content-Type: application/json' -d '{"filter":{"$ne":""}}'
+  - path: /mongo/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: json_field
+        param: filter
+        config:
+          database: mongodb
+          collection: users
+          operation: find
+          show_errors: true
+
+  # ===== HEADER - MONGODB =====
+  # 5. header mongodb find → curl 'http://localhost:8089/mongo/header' -H 'X-Query: {"$ne":""}'
+  - path: /mongo/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: header
+        param: X-Query
+        config:
+          database: mongodb
+          collection: users
+          operation: find
+          show_errors: true
+
+  # ===== COOKIE - MONGODB =====
+  # 6. cookie mongodb find → curl 'http://localhost:8089/mongo/cookie' -b 'query=%7B%22%24ne%22%3A%22%22%7D'
+  - path: /mongo/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: cookie
+        param: query
+        config:
+          database: mongodb
+          collection: users
+          operation: find
+          show_errors: true
+
+  # =============================================================================
+  # REDIS ENDPOINTS
+  # =============================================================================
+
+  # ===== QUERY PARAMETER - REDIS =====
+  # 7. query param redis get → curl 'http://localhost:8089/redis/query?key=x%0d%0aCONFIG%20GET%20*'
+  - path: /redis/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: query_param
+        param: key
+        config:
+          database: redis
+          operation: get
+          show_errors: true
+
+  # ===== PATH PARAMETER - REDIS =====
+  # 8. path param redis get → curl 'http://localhost:8089/redis/path/x%0d%0aFLUSHALL'
+  - path: /redis/path/{key}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: path_param
+        param: key
+        config:
+          database: redis
+          operation: get
+          show_errors: true
+
+  # ===== FORM FIELD - REDIS =====
+  # 9. form field redis get → curl 'http://localhost:8089/redis/form' -X POST --data-urlencode 'key=x\r\nKEYS *'
+  - path: /redis/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: form_field
+        param: key
+        config:
+          database: redis
+          operation: get
+          show_errors: true
+
+  # ===== JSON FIELD - REDIS =====
+  # 10. json field redis get → curl 'http://localhost:8089/redis/json' -X POST -H 'Content-Type: application/json' -d '{"key":"x\r\nKEYS *"}'
+  - path: /redis/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: json_field
+        param: key
+        config:
+          database: redis
+          operation: get
+          show_errors: true
+
+  # ===== HEADER - REDIS =====
+  # 11. header redis get → curl 'http://localhost:8089/redis/header' -H 'X-Key: x\r\nINFO'
+  - path: /redis/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: header
+        param: X-Key
+        config:
+          database: redis
+          operation: get
+          show_errors: true
+
+  # ===== COOKIE - REDIS =====
+  # 12. cookie redis get → curl 'http://localhost:8089/redis/cookie' -b 'key=x%0d%0aKEYS%20*'
+  - path: /redis/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: nosql_injection
+        placement: cookie
+        param: key
+        config:
+          database: redis
+          operation: get
+          show_errors: true

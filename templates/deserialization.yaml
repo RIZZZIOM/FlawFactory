@@ -1,0 +1,298 @@
+app:
+  name: "Insecure Deserialization Example Lab"
+  descrption: "A vulnerable application demonstrating Insecure Deserialization flaws."
+  host: "0.0.0.0"
+  port: 8087
+
+endpoints:
+  # ===== 1. JAVA FORMAT =====
+  # 1.1 query parameter → curl "http://localhost:8087/java/query?data=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+  - path: /java/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: query_param
+        param: data
+        config:
+          format: java
+          emulate_rce: true
+
+  # 1.2 path parameter → curl "http://localhost:8087/java/path/rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+  - path: /java/path/{data}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: path_param
+        param: data
+        config:
+          format: java
+          emulate_rce: true
+
+  # 1.3 form field → curl "http://localhost:8087/java/form" -X POST -d "object=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+  - path: /java/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: form_field
+        param: object
+        config:
+          format: java
+          emulate_rce: true
+
+  # 1.4 json field → curl "http://localhost:8087/java/json" -X POST -H "Content-Type: application/json" -d '{"payload":"rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"}'
+  - path: /java/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: json_field
+        param: payload
+        config:
+          format: java
+          emulate_rce: true
+
+  # 1.5 header → curl "http://localhost:8087/java/header" -H "X-Serialized-Object: rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+  - path: /java/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: header
+        param: X-Serialized-Object
+        config:
+          format: java
+          emulate_rce: true
+
+  # 1.6 cookie → curl "http://localhost:8087/java/cookie" -b "session=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+  - path: /java/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: cookie
+        param: session
+        config:
+          format: java
+          emulate_rce: true
+
+  # ===== 2. PHP FORMAT =====
+  # 2.1 query parameter → curl "http://localhost:8087/php/query?data=O:4:%22User%22:1:{s:4:%22name%22%3Bs:5:%22admin%22%3B}"
+  - path: /php/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: query_param
+        param: data
+        config:
+          format: php
+          emulate_rce: true
+
+  # 2.2 path parameter → curl "http://localhost:8087/php/path/O:4:%22User%22:1:{s:4:%22name%22%3Bs:5:%22admin%22%3B}"
+  - path: /php/path/{data}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: path_param
+        param: data
+        config:
+          format: php
+          emulate_rce: true
+
+  # 2.3 form field → curl "http://localhost:8087/php/form" -X POST -d "object=O:4:%22User%22:1:{s:4:%22name%22%3Bs:5:%22admin%22%3B}"
+  - path: /php/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: form_field
+        param: object
+        config:
+          format: php
+          emulate_rce: true
+
+  # 2.4 json field → curl "http://localhost:8087/php/json" -X POST -H "Content-Type: application/json" -d '{"payload":"O:4:\"User\":1:{s:4:\"name\";s:5:\"admin\";}"}'
+  - path: /php/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: json_field
+        param: payload
+        config:
+          format: php
+          emulate_rce: true
+
+  # 2.5 header → curl "http://localhost:8087/php/header" -H "X-Serialized-Object: O:4:\"User\":1:{s:4:\"name\";s:5:\"admin\";}"
+  - path: /php/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: header
+        param: X-Serialized-Object
+        config:
+          format: php
+          emulate_rce: true
+
+  # 2.6 cookie → curl "http://localhost:8087/php/cookie" -b "session=O:4:%22User%22:1:{s:4:%22name%22%3Bs:5:%22admin%22%3B}"
+  - path: /php/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: cookie
+        param: session
+        config:
+          format: php
+          emulate_rce: true
+
+  # ===== 3. PYTHON PICKLE FORMAT =====
+  # 3.1 query parameter → curl "http://localhost:8087/pickle/query?data=gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="
+  - path: /pickle/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: query_param
+        param: data
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # 3.2 path parameter → curl "http://localhost:8087/pickle/path/gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="
+  - path: /pickle/path/{data}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: path_param
+        param: data
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # 3.3 form field → curl "http://localhost:8087/pickle/form" -X POST -d "object=gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="
+  - path: /pickle/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: form_field
+        param: object
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # 3.4 json field → curl "http://localhost:8087/pickle/json" -X POST -H "Content-Type: application/json" -d '{"payload":"gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="}'
+  - path: /pickle/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: json_field
+        param: payload
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # 3.5 header → curl "http://localhost:8087/pickle/header" -H "X-Serialized-Object: gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="
+  - path: /pickle/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: header
+        param: X-Serialized-Object
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # 3.6 cookie → curl "http://localhost:8087/pickle/cookie" -b "session=gASVHAAAAAAAAACMCF9fbWFpbl9flIwEVXNlcpSTlCmBlH0="
+  - path: /pickle/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: cookie
+        param: session
+        config:
+          format: python_pickle
+          emulate_rce: true
+
+  # ===== 4. DOTNET FORMAT =====
+  # 4.1 query parameter → curl "http://localhost:8087/dotnet/query?data=AAEAAAD/////AQAAAAAAAAAPAQAAABxTeXN0ZW0="
+  - path: /dotnet/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: query_param
+        param: data
+        config:
+          format: dotnet
+          emulate_rce: true
+
+  # 4.2 path parameter → curl "http://localhost:8087/dotnet/path/AAEAAAD%2F%2F%2F%2F%2FAQAAAAAAAAAPAQAAABxTeXN0ZW0="
+  - path: /dotnet/path/{data}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: path_param
+        param: data
+        config:
+          format: dotnet
+          emulate_rce: true
+
+  # 4.3 form field → curl "http://localhost:8087/dotnet/form" -X POST -d "object=AAEAAAD/////AQAAAAAAAAAPAQAAABxTeXN0ZW0="
+  - path: /dotnet/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: form_field
+        param: object
+        config:
+          format: dotnet
+          emulate_rce: true
+
+  # 4.4 json field → curl "http://localhost:8087/dotnet/json" -X POST -H "Content-Type: application/json" -d '{"payload":"AAEAAAD/////AQAAAAAAAAAPAQAAABxTeXN0ZW0="}'
+  - path: /dotnet/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: json_field
+        param: payload
+        config:
+          format: dotnet
+          emulate_rce: true
+
+  # 4.5 header → curl "http://localhost:8087/dotnet/header" -H "X-Serialized-Object: AAEAAAD/////AQAAAAAAAAAPAQAAABxTeXN0ZW0="
+  - path: /dotnet/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: header
+        param: X-Serialized-Object
+        config:
+          format: dotnet
+          emulate_rce: true
+
+  # 4.6 cookie → curl "http://localhost:8087/dotnet/cookie" -b "session=AAEAAAD/////AQAAAAAAAAAPAQAAABxTeXN0ZW0="
+  - path: /dotnet/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: insecure_deserialization
+        placement: cookie
+        param: session
+        config:
+          format: dotnet
+          emulate_rce: true

@@ -1,0 +1,146 @@
+app:
+  name: "SSRF Example Lab"
+  descrption: "A vulnerable application demonstrating Server-Side Request Forgery flaws."
+  host: "0.0.0.0"
+  port: 8086
+
+endpoints:
+  # ===== QUERY PARAM =====
+  # 1. query param with none filter → curl "http://localhost:8086/query/none?url=http://example.com"
+  - path: /query/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: query_param
+        param: url
+        config:
+          filter: none
+
+  # 2. query param with scheme_only filter → curl "http://localhost:8086/query/scheme?url=http://example.com"
+  - path: /query/scheme
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: query_param
+        param: url
+        config:
+          filter: scheme_only
+          allowed_schemes: ["http://", "https://"]
+
+  # 3. query param with basic_host filter → curl "http://localhost:8086/query/host?url=http://example.com"
+  - path: /query/host
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: query_param
+        param: url
+        config:
+          filter: basic_host
+
+  # ===== FORM FIELD =====
+  # 4. form field with none filter → curl "http://localhost:8086/form/none" -X POST -d "target=http://example.com"
+  - path: /form/none
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: form_field
+        param: target
+        config:
+          filter: none
+
+  # 5. form field with scheme_only filter → curl "http://localhost:8086/form/scheme" -X POST -d "target=http://example.com"
+  - path: /form/scheme
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: form_field
+        param: target
+        config:
+          filter: scheme_only
+          allowed_schemes: ["http://", "https://"]
+
+  # 6. form field with basic_host filter → curl "http://localhost:8086/form/host" -X POST -d "target=http://example.com"
+  - path: /form/host
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: form_field
+        param: target
+        config:
+          filter: basic_host
+
+  # ===== JSON FIELD =====
+  # 7. json field with none filter → curl "http://localhost:8086/json/none" -X POST -H "Content-Type: application/json" -d '{"url":"http://example.com"}'
+  - path: /json/none
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: json_field
+        param: url
+        config:
+          filter: none
+
+  # 8. json field with scheme_only filter → curl "http://localhost:8086/json/scheme" -X POST -H "Content-Type: application/json" -d '{"url":"http://example.com"}'
+  - path: /json/scheme
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: json_field
+        param: url
+        config:
+          filter: scheme_only
+          allowed_schemes: ["http://", "https://"]
+
+  # 9. json field with basic_host filter → curl "http://localhost:8086/json/host" -X POST -H "Content-Type: application/json" -d '{"url":"http://example.com"}'
+  - path: /json/host
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: json_field
+        param: url
+        config:
+          filter: basic_host
+
+  # ===== HEADER =====
+  # 10. header with none filter → curl "http://localhost:8086/header/none" -H "X-Proxy-URL: http://example.com"
+  - path: /header/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: header
+        param: X-Proxy-URL
+        config:
+          filter: none
+
+  # 11. header with scheme_only filter → curl "http://localhost:8086/header/scheme" -H "X-Proxy-URL: http://example.com"
+  - path: /header/scheme
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: header
+        param: X-Proxy-URL
+        config:
+          filter: scheme_only
+          allowed_schemes: ["http://", "https://"]
+
+  # 12. header with basic_host filter → curl "http://localhost:8086/header/host" -H "X-Proxy-URL: http://example.com"
+  - path: /header/host
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: ssrf
+        placement: header
+        param: X-Proxy-URL
+        config:
+          filter: basic_host

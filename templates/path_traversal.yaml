@@ -1,0 +1,376 @@
+app:
+  name: "Path Traversal Example Lab"
+  descrption: "A vulnerable application demonstrating Path Traversal flaws."
+  host: "0.0.0.0"
+  port: 8083
+
+endpoints:
+  # ===== QUERY PARAMETER =====
+  # 1. query param with no filter → curl "http://localhost:8083/query/none?file=../etc/passwd"
+  - path: /query/none
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "uploads"
+          filter: none
+
+  # 2. query param with basic_dots filter → curl "http://localhost:8083/query/dots?file=....//etc/passwd"
+  - path: /query/dots
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "uploads"
+          filter: basic_dots
+
+  # 3. query param with basic_slashes filter → curl "http://localhost:8083/query/slashes?file=../etc/passwd"
+  - path: /query/slashes
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "uploads"
+          filter: basic_slashes
+
+  # 4. query param with null_byte filter → curl "http://localhost:8083/query/null?file=../etc/passwd"
+  - path: /query/null
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "uploads"
+          filter: null_byte
+
+  # 5. query param with url_decode filter → curl "http://localhost:8083/query/url?file=%252e%252e%252fetc%252fpasswd"
+  - path: /query/url
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "uploads"
+          filter: url_decode
+
+  # ===== PATH PARAMETER =====
+  # 6. path param with no filter → curl "http://localhost:8083/path/none/%2e%2e%2fetc%2fpasswd"
+  - path: /path/none/{file}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: path_param
+        param: file
+        config:
+          base_path: "documents"
+          filter: none
+
+  # 7. path param with basic_dots filter → curl "http://localhost:8083/path/dots/%2e%2e%2e%2e%2f%2fetc%2fpasswd"
+  - path: /path/dots/{file}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: path_param
+        param: file
+        config:
+          base_path: "documents"
+          filter: basic_dots
+
+  # 8. path param with basic_slashes filter → curl "http://localhost:8083/path/slashes/%2e%2e%2fetc%2fpasswd"
+  - path: /path/slashes/{file}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: path_param
+        param: file
+        config:
+          base_path: "documents"
+          filter: basic_slashes
+
+  # 9. path param with null_byte filter → curl "http://localhost:8083/path/null/%2e%2e%2fetc%2fpasswd"
+  - path: /path/null/{file}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: path_param
+        param: file
+        config:
+          base_path: "documents"
+          filter: null_byte
+
+  # 10. path param with url_decode filter → curl "http://localhost:8083/path/url/%252e%252e%252fetc%252fpasswd"
+  - path: /path/url/{file}
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: path_param
+        param: file
+        config:
+          base_path: "documents"
+          filter: url_decode
+
+  # ===== FORM FIELD =====
+  # 11. form field with no filter → curl "http://localhost:8083/form/none" -X POST -d "path=../etc/passwd"
+  - path: /form/none
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: path
+        config:
+          base_path: "uploads"
+          filter: none
+
+  # 12. form field with basic_dots filter → curl "http://localhost:8083/form/dots" -X POST -d "path=....//etc/passwd"
+  - path: /form/dots
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: path
+        config:
+          base_path: "uploads"
+          filter: basic_dots
+
+  # 13. form field with basic_slashes filter → curl "http://localhost:8083/form/slashes" -X POST -d "path=../etc/passwd"
+  - path: /form/slashes
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: path
+        config:
+          base_path: "uploads"
+          filter: basic_slashes
+
+  # 14. form field with null_byte filter → curl "http://localhost:8083/form/null" -X POST -d "path=../etc/passwd"
+  - path: /form/null
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: path
+        config:
+          base_path: "uploads"
+          filter: null_byte
+
+  # 15. form field with url_decode filter → curl "http://localhost:8083/form/url" -X POST -d "path=%2e%2e%2fetc%2fpasswd"
+  - path: /form/url
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: path
+        config:
+          base_path: "uploads"
+          filter: url_decode
+
+  # ===== JSON FIELD =====
+  # 16. JSON field with no filter → curl "http://localhost:8083/json/none" -X POST -H "Content-Type: application/json" -d '{"file":"../etc/passwd"}'
+  - path: /json/none
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: json_field
+        param: file
+        config:
+          base_path: "data"
+          filter: none
+
+  # 17. JSON field with basic_dots filter → curl "http://localhost:8083/json/dots" -X POST -H "Content-Type: application/json" -d '{"file":"....//etc/passwd"}'
+  - path: /json/dots
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: json_field
+        param: file
+        config:
+          base_path: "data"
+          filter: basic_dots
+
+  # 18. JSON field with basic_slashes filter → curl "http://localhost:8083/json/slashes" -X POST -H "Content-Type: application/json" -d '{"file":"../etc/passwd"}'
+  - path: /json/slashes
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: json_field
+        param: file
+        config:
+          base_path: "data"
+          filter: basic_slashes
+
+  # 19. JSON field with null_byte filter → curl "http://localhost:8083/json/null" -X POST -H "Content-Type: application/json" -d '{"file":"../etc/passwd"}'
+  - path: /json/null
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: json_field
+        param: file
+        config:
+          base_path: "data"
+          filter: null_byte
+
+  # 20. JSON field with url_decode filter → curl "http://localhost:8083/json/url" -X POST -H "Content-Type: application/json" -d '{"file":"%2e%2e%2fetc%2fpasswd"}'
+  - path: /json/url
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: json_field
+        param: file
+        config:
+          base_path: "data"
+          filter: url_decode
+
+  # ===== MULTIPART FORM =====
+  # 21. multipart form with no filter → curl "http://localhost:8083/multipart/none" -X POST -F "filepath=../etc/passwd"
+  - path: /multipart/none
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: multipart-form
+        param: filepath
+        config:
+          base_path: "uploads"
+          filter: none
+
+  # 22. multipart form with basic_dots filter → curl "http://localhost:8083/multipart/dots" -X POST -F "filepath=....//etc/passwd"
+  - path: /multipart/dots
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: multipart-form
+        param: filepath
+        config:
+          base_path: "uploads"
+          filter: basic_dots
+
+  # 23. multipart form with basic_slashes filter → curl "http://localhost:8083/multipart/slashes" -X POST -F "filepath=../etc/passwd"
+  - path: /multipart/slashes
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: multipart-form
+        param: filepath
+        config:
+          base_path: "uploads"
+          filter: basic_slashes
+
+  # 24. multipart form with null_byte filter → curl "http://localhost:8083/multipart/null" -X POST -F "filepath=../etc/passwd"
+  - path: /multipart/null
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: multipart-form
+        param: filepath
+        config:
+          base_path: "uploads"
+          filter: null_byte
+
+  # 25. multipart form with url_decode filter → curl "http://localhost:8083/multipart/url" -X POST -F "filepath=%2e%2e%2fetc%2fpasswd"
+  - path: /multipart/url
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: multipart-form
+        param: filepath
+        config:
+          base_path: "uploads"
+          filter: url_decode
+
+  # ===== APPEND EXTENSION EXAMPLES =====
+  # 26. append extension with no filter → curl "http://localhost:8083/ext/none?file=../etc/passwd%00"
+  - path: /ext/none
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "logs"
+          filter: none
+          append_extension: ".log"
+
+  # 27. append extension with null_byte filter (historic bypass) → curl "http://localhost:8083/ext/null?file=../etc/passwd%00"
+  - path: /ext/null
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "logs"
+          filter: null_byte
+          append_extension: ".log"
+
+  # 28. append extension via form → curl "http://localhost:8083/ext/form" -X POST -d "doc=../app/config"
+  - path: /ext/form
+    method: POST
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: form_field
+        param: doc
+        config:
+          base_path: "docs"
+          filter: none
+          append_extension: ".ini"
+
+  # ===== DIFFERENT BASE PATHS =====
+  # 29. empty base path (root access) → curl "http://localhost:8083/root?file=etc/passwd"
+  - path: /root
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: ""
+          filter: none
+
+  # 30. deep base path → curl "http://localhost:8083/deep?file=../../../../etc/passwd"
+  - path: /deep
+    method: GET
+    response_type: text
+    vulnerabilities:
+      - type: path_traversal
+        placement: query_param
+        param: file
+        config:
+          base_path: "var/www/app/uploads"
+          filter: none

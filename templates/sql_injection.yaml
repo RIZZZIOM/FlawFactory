@@ -1,0 +1,180 @@
+app:
+  name: "SQL Injection Example Lab"
+  descrption: "A vulnerable application demonstrating SQL Injection flaws."
+  host: "0.0.0.0"
+  port: 8081
+
+data:
+  tables:
+    users:
+      columns: [id, username, password, is_admin]
+      rows:
+        - [1, "admin", "adminpass", "false"]
+        - [2, "rick", "c137", "true"]
+        - [3, "morty", "sidekick", "false"]
+        - [4, "beth", "jerry", "false"]
+    cars:
+      columns: [sr, company, model, colour, country_code]
+      rows:
+        - [1, "suzuki", "jimny", "blue", "JP"]
+        - [2, "lamborghini", "aventador", "orange", "IT"]
+        - [3, "bmw", "m4", "white", "GER"]
+        - [4, "jeep", "wrangler", "green", "US"]
+        - [5, "aston martin", "db12", "black", "UK"]
+    bikes:
+      columns: [no, company, model, colour, country_code]
+      rows:
+        - [1, "bmw", "s1000rr", "white", "GER"]
+        - [2, "mv agusta", "brutale", "red", "IT"]
+        - [3, "honda", "cbr600rr", "blue", "JP"]
+
+endpoints:
+  # ===== QUERY PARAMETER =====
+  # 1. error based SQLi → curl "http://localhost:8081/error/query?id=1%20OR%201=1"
+  - path: /error/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: query_param
+        param: id
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 2. blind boolean SQLi → curl "http://localhost:8081/blind/query?sr=1%20OR%201=1"
+  - path: /blind/query
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: query_param
+        param: sr
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM cars WHERE sr = {input}"
+
+  # ===== PATH PARAMETER =====
+  # 3. error based SQLi via path → curl "http://localhost:8081/error/path/1%20OR%201=1"
+  - path: /error/path/{id}
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: path_param
+        param: id
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 4. blind boolean SQLi via path → curl "http://localhost:8081/blind/path/1%20OR%201=1"
+  - path: /blind/path/{sr} 
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: path_param
+        param: sr
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM cars WHERE sr = {input}"
+
+  # ===== FORM FIELD =====
+  # 5. error based SQLi via form → curl "http://localhost:8081/error/form" -X POST -d "username=admin' OR '1'='1"
+  - path: /error/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: form_field
+        param: username
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE username = '{input}'"
+
+  # 6. blind boolean SQLi via form → curl "http://localhost:8081/blind/form" -X POST -d "company=toyota' OR '1'='1"
+  - path: /blind/form
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: form_field
+        param: company
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM cars WHERE company = '{input}'"
+
+  # ===== JSON BODY =====
+  # 7. error based SQLi via JSON → curl "http://localhost:8081/error/json" -X POST -d '{"id":"1 OR 1=1"}'
+  - path: /error/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: json_field
+        param: id
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 8. blind boolean SQLi via JSON → curl "http://localhost:8081/blind/json" -X POST -d '{"no":"1 OR 1=1"}'
+  - path: /blind/json
+    method: POST
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: json_field
+        param: no
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM bikes WHERE no = {input}"
+
+  # ===== HEADERS =====
+  # 9. error based SQLi via header → curl "http://localhost:8081/error/header" -H "X-User-ID: 1 OR 1=1"
+  - path: /error/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: header
+        param: X-User-ID
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 10. blind boolean SQLi via header → curl "http://localhost:8081/blind/header" -H "X-Car-ID: 1 OR 1=1"
+  - path: /blind/header
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: header
+        param: X-Car-ID
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM cars WHERE sr = {input}"
+
+  # ===== COOKIE =====
+  # 11. error based SQLi via cookie → curl "http://localhost:8081/error/cookie" -b "user_id=1 OR 1=1"
+  - path: /error/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: cookie
+        param: user_id
+        config:
+          variant: error_based
+          query_template: "SELECT * FROM users WHERE id = {input}"
+
+  # 12. blind boolean SQLi via cookie → curl "http://localhost:8081/blind/cookie" -b "bike_id=1 OR 1=1"
+  - path: /blind/cookie
+    method: GET
+    response_type: json
+    vulnerabilities:
+      - type: sql_injection
+        placement: cookie
+        param: bike_id
+        config:
+          variant: blind_boolean
+          query_template: "SELECT * FROM bikes WHERE no = {input}"
