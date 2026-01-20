@@ -90,7 +90,7 @@ cd FlawFactory
 go build -o flawfactory .
 ```
 
-Or grab a pre-built binary from the [Releases](https://github.com/RIZZZIOM/FlawFactory/releases/) page.
+Or grab a pre-built binary from the [Releases](https://github.com/RIZZZIOM/FlawFactory/releases) page.
 
 ### Basic Usage
 

@@ -57,6 +57,9 @@ func (e *Extractor) extractPathParam(r *http.Request, param string) string {
 
 // extractHeader extracts a value from HTTP headers
 func (e *Extractor) extractHeader(r *http.Request, param string) string {
+    if strings.EqualFold(param, "Host") {
+        return r.Host
+    }
 	return r.Header.Get(param)
 }
 
